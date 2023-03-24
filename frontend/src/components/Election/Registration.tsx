@@ -94,7 +94,7 @@ export function Registration({ electionAddress }: Props) {
         </Alert>
       )}
       {(isRegisteredAsCandidate || isRegisteredAsVoter) && (
-        <p>Insert funny gif here</p>
+        <Heading>Get ready to vote!</Heading>
       )}
       {(!isRegisteredAsCandidate || !isRegisteredAsVoter) && (
         <form onSubmit={handleSubmit(onSubmit)}>
