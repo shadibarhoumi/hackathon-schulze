@@ -6,7 +6,7 @@ const nextConfig = {
       { hostname: 'localhost' },
       {
         protocol: 'https',
-        hostname: 'loremflickr.com',
+        hostname: '**',
       },
     ],
   },

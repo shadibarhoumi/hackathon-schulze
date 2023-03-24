@@ -7,6 +7,7 @@ interface Props {
 }
 
 export const CandidateItem = ({ candidate }: Props) => {
+  console.log(candidate)
   const { description, name, address, imageUrl } = candidate
   return (
     <Flex gap={10}>
@@ -16,7 +17,7 @@ export const CandidateItem = ({ candidate }: Props) => {
       <Box>
         <Heading size="md">{name}</Heading>
         <Text>{description}</Text>
-        <Text>{address.substring(0, 8)}</Text>
+        <Text>{address.substring(0, 8)}...</Text>
       </Box>
     </Flex>
   )

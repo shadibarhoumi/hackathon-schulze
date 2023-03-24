@@ -17,7 +17,12 @@ export const fetchCandidates = async (
     )
     querySnapshot.forEach((doc) => {
       const candidate = doc.data()
-      candidateMap[candidate.address] = candidate as Candidate
+      candidateMap[candidate.address] = {
+        name: candidate.name,
+        description: candidate.description,
+        address: candidate.address,
+        imageUrl: candidate.image_url,
+      } as Candidate
     })
   } else {
     const req = await fetch(
@@ -29,8 +34,10 @@ export const fetchCandidates = async (
     })
   }
 
-  const candidates: Candidate[] = candidateAddresses.map((address: string) => {
-    return candidateMap[address]
-  })
+  const candidates: Candidate[] = candidateAddresses
+    .map((address: string) => {
+      return candidateMap[address]
+    })
+    .filter((candidate) => !!candidate)
   return candidates
 }
