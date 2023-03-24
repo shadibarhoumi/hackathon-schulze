@@ -10,6 +10,7 @@ interface CandidateInput {
   chainId: number | undefined
 }
 
+const useFirebase = true
 export const saveCandidate = async ({
   address,
   electionAddress,
@@ -18,38 +19,41 @@ export const saveCandidate = async ({
   imageUrl,
   chainId,
 }: CandidateInput) => {
-  try {
-    await setDoc(
-      doc(clientDb, `candidates-${chainId}-${electionAddress}/${address}`),
+  if (useFirebase) {
+    try {
+      await setDoc(
+        doc(clientDb, `candidates-${chainId}-${electionAddress}/${address}`),
+        {
+          name,
+          description,
+          address,
+          image_url: imageUrl,
+          election_address: electionAddress,
+          chain_id: chainId,
+        },
+      )
+    } catch (err) {
+      return false
+    }
+    return true
+  } else {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_BACKEND_URL! + '/candidate',
       {
-        name,
-        description,
-        address,
-        image_url: imageUrl,
-        election_address: electionAddress,
-        chain_id: chainId,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          description,
+          address,
+          image_url: imageUrl,
+          election_address: electionAddress,
+          chain_id: chainId,
+        }),
       },
     )
-  } catch (err) {
-    return false
+    return response.status === 200
   }
-  return true
-  // const response = await fetch(
-  //   process.env.NEXT_PUBLIC_BACKEND_URL! + '/candidate',
-  //   {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({
-  //       name,
-  //       description,
-  //       address,
-  //       image_url: imageUrl,
-  //       election_address: electionAddress,
-  //       chain_id: chainId,
-  //     }),
-  //   },
-  // )
-  // return response.status === 200
 }
