@@ -1,5 +1,6 @@
 import type { AppProps } from 'next/app'
 import { ChakraProvider } from '@chakra-ui/react'
+import { Toaster } from 'react-hot-toast'
 import {
   Config,
   DAppProvider,
@@ -26,6 +27,7 @@ const useDappConfig: Config = {
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <DAppProvider config={useDappConfig}>
+      <Toaster />
       <ChakraProvider>
         <Component {...pageProps} />
       </ChakraProvider>

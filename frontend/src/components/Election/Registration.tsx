@@ -1,5 +1,8 @@
 import { useRegistrationStatus } from '@/hooks/useRegistrationStatus'
 import { ParticipantType, Election } from '@/types/Election'
+import { saveCandidate } from '@/utils/saveCandidate'
+import { fetchCandidates } from '@/utils/fetchCandidates'
+
 import {
   Alert,
   AlertIcon,
@@ -15,15 +18,29 @@ import {
   Textarea,
 } from '@chakra-ui/react'
 import { useEthers } from '@usedapp/core'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'react-hot-toast'
+import { saveVoter } from '@/utils/saveVoter'
 
 interface Props {
   electionAddress: string
 }
 
+export interface CandidateFormSchema {
+  name: string
+  description: string
+  imageUrl: string
+}
+
 export function Registration({ electionAddress }: Props) {
-  const { account } = useEthers()
+  const { account, chainId } = useEthers()
+  const { handleSubmit, register } = useForm<CandidateFormSchema>({
+    defaultValues: {},
+  })
   const [type, setType] = useState<ParticipantType>('voter')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const isRegisteredAsVoter = useRegistrationStatus(
     account,
     electionAddress,
@@ -35,8 +52,28 @@ export function Registration({ electionAddress }: Props) {
     'candidate',
   )
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
+  const onSubmit = async (candidateData: CandidateFormSchema) => {
+    console.log('submitted', candidateData)
+    setIsSubmitting(true)
+    let success
+    if (type === 'candidate') {
+      success = await saveCandidate({
+        address: account,
+        electionAddress,
+        chainId,
+        ...candidateData,
+      })
+    } else {
+      success = await saveVoter({
+        address: account,
+        electionAddress,
+        chainId,
+      })
+    }
+    if (success) {
+      toast(`You have successfully registered as a ${type}!`)
+    }
+    setIsSubmitting(false)
     console.log(`Registering ${account} as ${type}`)
   }
 
@@ -60,7 +97,7 @@ export function Registration({ electionAddress }: Props) {
         <p>Insert funny gif here</p>
       )}
       {(!isRegisteredAsCandidate || !isRegisteredAsVoter) && (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={5}>
             <FormControl>
               <FormLabel>Address</FormLabel>
@@ -81,15 +118,30 @@ export function Registration({ electionAddress }: Props) {
               <>
                 <FormControl>
                   <FormLabel>Project Name</FormLabel>
-                  <Input placeholder="Name" />
+                  <Input {...register('name')} placeholder="Name" />
                 </FormControl>
                 <FormControl>
                   <FormLabel>Project Description</FormLabel>
-                  <Textarea placeholder="Description" />
+                  <Textarea
+                    {...register('description')}
+                    placeholder="Description"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Image Url</FormLabel>
+                  <Input
+                    {...register('imageUrl')}
+                    placeholder="https://funnyimage.com/image.jpeg"
+                  />
                 </FormControl>
               </>
             )}
-            <Button colorScheme="blue" type="submit">
+            <Button
+              isLoading={isSubmitting}
+              loadingText="Registering..."
+              colorScheme="blue"
+              type="submit"
+            >
               Register
             </Button>
           </Stack>
