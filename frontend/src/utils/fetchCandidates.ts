@@ -28,7 +28,6 @@ export const fetchCandidates = async (
       candidateMap[candidate.address] = candidate
     })
   }
-  console.log({ candidateMap })
 
   const candidates: Candidate[] = candidateAddresses.map((address: string) => {
     return candidateMap[address]
